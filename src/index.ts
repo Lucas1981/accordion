@@ -12,7 +12,7 @@ class Main {
         this.piano = new Piano()
         this.accordion = new Accordion()
         this.canvasDrawer = new CanvasDrawer(
-            1200,
+            1280,
             800,
             this.checkMouseDown,
             this.checkMouseUp

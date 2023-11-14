@@ -54,7 +54,7 @@ export class Piano {
     
         for (const pianoKey of pianoKeys) {
             const isNewTouch = id !== null && !registeredPianoTouches[id];
-            const isDifferentKey = id !== null && registeredPianoTouches[id] !== pianoKey;
+            const isDifferentKey = id !== null && registeredPianoTouches[id] && registeredPianoTouches[id] !== pianoKey;
     
             if (isNewTouch || isDifferentKey) {
                 if (isDifferentKey) {
@@ -85,7 +85,7 @@ export class Piano {
     
         return markedPianoKeys
     }
-    
+
     private resetPianoKeyAndStopAudio(pianoKey: PianoKey) {
         pianoKey.fillColor = pianoKey.type;
         this.audioPlayer.stop([pianoKey.value]);
