@@ -42,56 +42,58 @@ export class Accordion {
         this.audioPlayer = new AudioPlayer()
     }
 
+    drawAccordion(canvasDrawer: CanvasDrawer) {
+        for (const { x, y, text, radius, fillColor, strokeColor} of this.accordionKeys) {
+            canvasDrawer.drawCircle(x, y, radius, fillColor, strokeColor);
+            canvasDrawer.drawText(x, y, text)
+        }
+    }
+
     checkMouseUp(x: number, y: number, id = null) {
-        const circle = this.checkClick(x, y)
+        const circle = this.checkClick(x, y);
 
         if (circle) {
-            // Do we have an id and is the associated value the same?
-            if (id !== null) {
-                // If we don't have this key as pressed
-                if (!this.registeredAccordionTouches[id]) {
-                    // Then we can register it as a pressed key
-                    this.registeredAccordionTouches[id] = circle
-                    circle.fillColor = 'lightblue'
-                    this.audioPlayer.play(circle.value)        
-                // If we do have this touch pressed but it's not the same key            
-                } else if (circle !== this.registeredAccordionTouches[id]) {
-                    // Then first stop playing the current note
-                    (this.registeredAccordionTouches[id] as AccordionKey).fillColor = 'white'
-                    this.audioPlayer.stop((this.registeredAccordionTouches[id] as AccordionKey).value)
-                    this.registeredAccordionTouches[id] = circle
+            const isTouchRegistered = id !== null && this.registeredAccordionTouches[id];
+            const isDifferentTouch = isTouchRegistered && this.registeredAccordionTouches[id] !== circle;
 
-                    // Then start playing the new note
-                    circle.fillColor = 'lightblue'
-                    this.audioPlayer.play(circle.value)
+            if (!isTouchRegistered || isDifferentTouch) {
+                if (isDifferentTouch) {
+                    this.resetAccordionKeyAndStopAudio(this.registeredAccordionTouches[id] as AccordionKey);
                 }
-            } else {
-                if (circle.fillColor !== 'lightblue') {
-                    circle.fillColor = 'lightblue'
-                    this.audioPlayer.play(circle.value)
-                }    
+
+                if (id !== null) {
+                    this.registeredAccordionTouches[id] = circle;
+                }
+                
+                this.updateAccordionKeyColorAndPlay(circle, 'lightblue');
             }
         }
     }
 
     checkMouseDown(x: number, y: number, id = null) {
-        const circle = this.checkClick(x, y)
+        const circle = this.checkClick(x, y);
 
         if (circle) {
-            if (id !== null && !!this.registeredAccordionTouches[id]) {
-                (this.registeredAccordionTouches[id] as AccordionKey).fillColor = 'white'
-                this.audioPlayer.stop((this.registeredAccordionTouches[id] as AccordionKey).value)
-                this.registeredAccordionTouches[id] = null
+            if (id !== null && this.registeredAccordionTouches[id]) {
+                this.resetAccordionKeyAndStopAudio(this.registeredAccordionTouches[id] as AccordionKey);
+                this.registeredAccordionTouches[id] = null;
             } else {
-                if (circle.fillColor !== 'white') {
-                    circle.fillColor = 'white'
-                    this.audioPlayer.stop(circle.value)
-                }    
+                this.resetAccordionKeyAndStopAudio(circle);
             }
         }
     }
 
-    checkClick(x: number, y: number) {
+    private resetAccordionKeyAndStopAudio(accordionKey: AccordionKey) {
+        accordionKey.fillColor = 'white';
+        this.audioPlayer.stop(accordionKey.value);
+    }
+
+    private updateAccordionKeyColorAndPlay(accordionKey: AccordionKey, color: string) {
+        accordionKey.fillColor = color;
+        this.audioPlayer.play(accordionKey.value);
+    }
+
+    private checkClick(x: number, y: number) {
         for (const circle of this.accordionKeys) {
             const distance = Math.sqrt((x - circle.x) ** 2 + (y - circle.y) ** 2);
     
@@ -101,13 +103,6 @@ export class Accordion {
         }
 
         return null
-    }
-
-    drawAccordion(canvasDrawer: CanvasDrawer) {
-        for (const { x, y, text, radius, fillColor, strokeColor} of this.accordionKeys) {
-            canvasDrawer.drawCircle(x, y, radius, fillColor, strokeColor);
-            canvasDrawer.drawText(x, y, text)
-        }
     }
 
     private initiateAccordion() {

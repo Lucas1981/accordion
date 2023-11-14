@@ -36,7 +36,38 @@ export class Piano {
         }
     }
 
-    checkPianoKeys(x: number, y: number) {
+    checkMouseDown(x: number, y: number, id = null) {
+        const pianoKeys = this.checkPianoKeys(x, y);
+    
+        for (const pianoKey of pianoKeys) {
+            if (id !== null && registeredPianoTouches[id]) {
+                this.resetPianoKeyAndStopAudio(registeredPianoTouches[id] as PianoKey);
+                registeredPianoTouches[id] = null;
+            } else {
+                this.resetPianoKeyAndStopAudio(pianoKey);
+            }
+        }
+    }
+    
+    checkMouseUp(x: number, y: number, id = null) {
+        const pianoKeys = this.checkPianoKeys(x, y);
+    
+        for (const pianoKey of pianoKeys) {
+            const isNewTouch = id !== null && !registeredPianoTouches[id];
+            const isDifferentKey = id !== null && registeredPianoTouches[id] !== pianoKey;
+    
+            if (isNewTouch || isDifferentKey) {
+                if (isDifferentKey) {
+                    this.resetPianoKeyAndStopAudio(registeredPianoTouches[id] as PianoKey);
+                }
+                registeredPianoTouches[id] = pianoKey;
+            }
+    
+            this.updatePianoKeyColorAndPlay(pianoKey);
+        }
+    }
+
+    private checkPianoKeys(x: number, y: number) {
         const markedPianoKeys: PianoKey[] = []
         const reversedOrder = [...this.pianoKeys].reverse()
     
@@ -54,45 +85,16 @@ export class Piano {
     
         return markedPianoKeys
     }
-
-    checkMouseDown(x: number, y: number, id = null) {
-        const pianoKeys = this.checkPianoKeys(x, y)
-
-        for (const pianoKey of pianoKeys) {
-            if (id !== null && !!registeredPianoTouches[id]) {
-                (registeredPianoTouches[id] as PianoKey).fillColor = (registeredPianoTouches[id] as PianoKey).type
-                this.audioPlayer.stop([(registeredPianoTouches[id] as PianoKey).value])
-                registeredPianoTouches[id] = null
-            } else {
-                pianoKey.fillColor = pianoKey.type
-                this.audioPlayer.stop([pianoKey.value])    
-            }
-        }
+    
+    private resetPianoKeyAndStopAudio(pianoKey: PianoKey) {
+        pianoKey.fillColor = pianoKey.type;
+        this.audioPlayer.stop([pianoKey.value]);
     }
-
-    checkMouseUp(x: number, y: number, id = null) {
-        const pianoKeys = this.checkPianoKeys(x, y)
-
-        for (const pianoKey of pianoKeys) {
-            if (id !== null) {
-                if (!registeredPianoTouches[id]) {
-                    registeredPianoTouches[id] = pianoKey
-                    pianoKey.fillColor = pianoKey.type === 'black' ? 'pink' : 'lightblue'
-                    this.audioPlayer.play([pianoKey.value])    
-                } else if (registeredPianoTouches[id] !== pianoKey) {
-                    (registeredPianoTouches[id] as PianoKey).fillColor = (registeredPianoTouches[id] as PianoKey).type
-                    this.audioPlayer.stop([(registeredPianoTouches[id] as PianoKey).value])
-                    registeredPianoTouches[id] = pianoKey
-                    
-                    pianoKey.fillColor = pianoKey.type === 'black' ? 'pink' : 'lightblue'
-                    this.audioPlayer.play([pianoKey.value])
-                }
-            } else {
-                pianoKey.fillColor = pianoKey.type === 'black' ? 'pink' : 'lightblue'
-                this.audioPlayer.play([pianoKey.value])    
-            }
-        }
-    }
+    
+    private updatePianoKeyColorAndPlay(pianoKey: PianoKey) {
+        pianoKey.fillColor = pianoKey.type === 'black' ? 'pink' : 'lightblue';
+        this.audioPlayer.play([pianoKey.value]);
+    }    
 
     private isOverlapping(pianoKey: PianoKey, markedPianoKeys: PianoKey[]): boolean {
         for (const markedPianoKey of markedPianoKeys) {
