@@ -14,8 +14,8 @@ class Main {
         this.canvasDrawer = new CanvasDrawer(
             1200,
             800,
-            this.checkMouseDown,
-            this.checkMouseUp
+            this.checkMouseDown.bind(this),
+            this.checkMouseUp.bind(this)
         )
     }
 
@@ -28,16 +28,16 @@ class Main {
         this.accordion.drawAccordion(this.canvasDrawer)
         this.piano.drawPiano(this.canvasDrawer)
         if (!this.destroy) {
-            requestAnimationFrame(this.loop)
+            requestAnimationFrame(this.loop.bind(this))
         }
     }
 
-    private checkMouseUp(x: number, y: number, id = null) {
+    checkMouseUp(x: number, y: number, id = null) {
         this.accordion.checkMouseUp(x, y, id)
         this.piano.checkMouseUp(x, y, id)
     }
 
-    private checkMouseDown(x: number, y: number, id = null) {
+    checkMouseDown(x: number, y: number, id = null) {
         this.accordion.checkMouseDown(x, y, id)
         this.piano.checkMouseDown(x, y, id)
     }
