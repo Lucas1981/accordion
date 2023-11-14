@@ -49,7 +49,6 @@ export class Piano {
                 !this.isOverlapping(pianoKey, markedPianoKeys)
             ) {
                 markedPianoKeys.push(pianoKey)
-                console.log(markedPianoKeys)
             }
         }
     
@@ -97,7 +96,6 @@ export class Piano {
 
     private isOverlapping(pianoKey: PianoKey, markedPianoKeys: PianoKey[]): boolean {
         for (const markedPianoKey of markedPianoKeys) {
-            console.log('inspecting', markedPianoKey.value)
             if (!(
                 pianoKey.x + pianoKey.width < markedPianoKey.x ||
                 markedPianoKey.x + markedPianoKey.width < pianoKey.x ||
